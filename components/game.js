@@ -114,4 +114,8 @@ class Game {
   }
 }
 
-let x = new Game(standardWidth, standardHeight);
+module.exports = {
+  Game,
+  standardWidth,
+  standardHeight,
+};
