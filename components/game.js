@@ -12,6 +12,7 @@ class Game {
 
     // Is the game over?
     this.gameOver = false;
+    this.winner = null;
   }
 
   // Reset the game
@@ -44,6 +45,12 @@ class Game {
 
   // Determine if the game is over
   _isGameOver(column) {
+    // Check if there are no available moves
+    if (!this.availableMoves().length) {
+      this.winner = 0.5;
+      return true;
+    }
+
     // Every direction in which a player could have a match
     const dirs = [
       [1, 0],
@@ -137,6 +144,7 @@ class Game {
       console.log(`Player ${(this.turn % 2) + 1} has won!`);
       this.printBoard();
       this.gameOver = true;
+      this.winner = this.turn % 2;
       return this.turn % 2;
     }
 
