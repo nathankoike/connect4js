@@ -1,3 +1,0 @@
-class MonteCarlo {
-  constructor(piece) {}
-}
