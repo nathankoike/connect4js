@@ -1,18 +1,21 @@
 const [standardWidth, standardHeight] = [7, 6];
 
 class Game {
-  constructor(width, height) {
+  constructor(width = standardWidth, height = standardHeight) {
     // Create an empty board
     this.board = [];
-    for (let c = 0; c < width; c++) this.board.push(Array(height).fill(" "));
+    for (let c = 0; c < width; c++) this.board.push(Array(height).fill(0));
 
     // The players and the turn number
-    this.players = ["x", "o"];
+    this.players = [1, -1];
     this.turn = 0;
+
+    // Is the game over?
+    this.gameOver = false;
   }
 
   // Reset the game
-  _reset() {
+  reset() {
     // Reset the board
     for (let c = 0; c < this.board.length; c++)
       this.board[c] = Array(this.board[0].length).fill(" ");
@@ -24,7 +27,7 @@ class Game {
   // Determine if a move is valid
   _isMoveValid(column) {
     // Does the column still have an empty space?
-    return this.board[column].indexOf(" ") >= 0;
+    return this.board[column].indexOf(0) >= 0;
   }
 
   // Determine if the game is over
@@ -40,7 +43,7 @@ class Game {
     // Search every direction
     for (let i = 0; i < dirs.length; i++) {
       // Find the coordinates of the placed piece
-      let coords = [column, this.board[column].indexOf(" ") - 1];
+      let coords = [column, this.board[column].indexOf(0) - 1];
 
       // Make sure the starting coordinates are within the board
       if (coords[1] < 0) coords[1] = this.board[0].length - 1;
@@ -67,10 +70,11 @@ class Game {
         coords[1] < this.board[0].length;
         coords = [coords[0] + dirs[i][0], coords[1] + dirs[i][1]]
       )
-        line += this.board[coords[0]][coords[1]];
+        line += this.board[coords[0]][coords[1]].toString();
 
       // If the line has four in a row, we can end here
-      if (line.includes(this.players[this.turn % 2].repeat(4))) return true;
+      if (line.includes(this.players[this.turn % 2].toString().repeat(4)))
+        return true;
     }
 
     return false;
@@ -81,7 +85,12 @@ class Game {
     for (let r = this.board[0].length - 1; r >= 0; r--) {
       let row = "";
 
-      for (let c = 0; c < this.board.length; c++) row += this.board[c][r] + " ";
+      for (let c = 0; c < this.board.length; c++) {
+        let place = this.board[c][r];
+
+        if (place) row += (this.board[c][r] > 0 ? "x" : "o") + " ";
+        else row += "  ";
+      }
 
       console.log(row);
     }
@@ -97,7 +106,7 @@ class Game {
 
     // Place the user's piece in the correct column
     this.board = this.board.map((e, i) => {
-      if (i === column) e[e.indexOf(" ")] = this.players[this.turn % 2];
+      if (i === column) e[e.indexOf(0)] = this.players[this.turn % 2];
 
       return e;
     });
@@ -105,7 +114,7 @@ class Game {
     if (this._isGameOver(column)) {
       console.log(`Player ${(this.turn % 2) + 1} has won!`);
       this.printBoard();
-      this._reset();
+      this.gameOver = true;
       return this.turn % 2;
     }
 
