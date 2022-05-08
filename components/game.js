@@ -24,6 +24,18 @@ class Game {
     this.turn = 0;
   }
 
+  // Create a deep copy of this game
+  copy() {
+    let gameCopy = new Game();
+
+    // Copy the game data
+    gameCopy.board = this.board.map((e) => e.map((p) => p));
+    gameCopy.turn = this.turn;
+    gameCopy.gameOver = this.gameOver;
+
+    return gameCopy;
+  }
+
   // Determine if a move is valid
   _isMoveValid(column) {
     // Does the column still have an empty space?
@@ -94,6 +106,16 @@ class Game {
 
       console.log(row);
     }
+  }
+
+  // All available moves
+  availableMoves() {
+    let moves = [];
+
+    for (let i = 0; i < this.board.length; i++)
+      if (this._isMoveValid(i)) moves.push(i);
+
+    return moves;
   }
 
   // Place a player's piece and increment the turn count
