@@ -92,8 +92,11 @@ class Game {
         line += this.board[coords[0]][coords[1]].toString();
 
       // If the line has four in a row, we can end here
-      if (line.includes(this.players[this.turn % 2].toString().repeat(4)))
+      if (line.includes(this.players[this.turn % 2].toString().repeat(4))) {
+        // Set the winner and return true
+        this.winner = this.turn % 2;
         return true;
+      }
     }
 
     return false;
@@ -129,7 +132,7 @@ class Game {
   move(column) {
     // If the user had tried to enter an invalid move
     if (!this._isMoveValid(column)) {
-      this.printBoard();
+      // this.printBoard();
       return;
     }
 
@@ -141,15 +144,19 @@ class Game {
     });
 
     if (this._isGameOver(column)) {
-      console.log(`Player ${(this.turn % 2) + 1} has won!`);
-      this.printBoard();
+      // Print a nice message
+      // if (this.winner !== 0.5)
+      //   console.log(`Player ${(this.turn % 2) + 1} has won!`);
+      // else console.log("This game was a draw!");
+
+      // this.printBoard();
+
       this.gameOver = true;
-      this.winner = this.turn % 2;
-      return this.turn % 2;
+      return this.winner;
     }
 
     this.turn++;
-    return " ";
+    return null;
   }
 }
 
