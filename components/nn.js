@@ -47,9 +47,9 @@ function update(neuralNetwork, deltaNetwork) {
   return neuralNetwork.map((layer, i) =>
     layer.map(([weights, bias], j) => [
       weights.map(
-        weight => weight + deltaNetwork[i][j] * (alpha + alpha * alpha)
+        (weight) => weight + deltaNetwork[i][j] * (alpha + alpha * alpha)
       ),
-      bias + alpha * deltaNetwork[i][j]
+      bias + alpha * deltaNetwork[i][j],
     ])
   );
 }
@@ -69,11 +69,11 @@ function backprop(nn, result, expected) {
     // Not output layer
     if (i) {
       deltaNetwork.push(
-        layer.map(node =>
+        layer.map((node) =>
           nn[i - 1]
             .map(([nextWeights, bias], j) =>
               nextWeights
-                .map(weight => weight * deltaNetwork[i - 1][j])
+                .map((weight) => weight * deltaNetwork[i - 1][j])
                 .reduce((prev, curr) => prev + curr)
             )
             .reduce((prev, curr) => prev + curr)
@@ -134,8 +134,14 @@ function unfunn(inputSize, layers) {
   });
 }
 
+// Save the NN to a JSON object
+function toJSON(nn) {
+  return { nn };
+}
+
 module.exports = {
+  sigmoid,
   train,
   predict,
-  unfunn
+  unfunn,
 };

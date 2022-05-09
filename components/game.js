@@ -8,6 +8,7 @@ class Game {
 
     // The players and the turn number
     this.players = [1, -1];
+    this.playerRepr = ["x", "o"];
     this.turn = 0;
 
     // Is the game over?
@@ -47,7 +48,7 @@ class Game {
   _isGameOver(column) {
     // Check if there are no available moves
     if (!this.availableMoves().length) {
-      this.winner = 0.5;
+      this.winner = 0;
       return true;
     }
 
@@ -78,7 +79,7 @@ class Game {
         coords = [coords[0] - dirs[i][0], coords[1] - dirs[i][1]]
       );
 
-      // Build the string
+      // Build the line
       let line = "";
 
       for (
@@ -89,12 +90,14 @@ class Game {
         coords[1] < this.board[0].length;
         coords = [coords[0] + dirs[i][0], coords[1] + dirs[i][1]]
       )
-        line += this.board[coords[0]][coords[1]].toString();
+        line += this.playerRepr[
+          this.players.indexOf(this.board[coords[0]][coords[1]])
+        ];
 
       // If the line has four in a row, we can end here
-      if (line.includes(this.players[this.turn % 2].toString().repeat(4))) {
+      if (line.includes(this.playerRepr[this.turn % 2].toString().repeat(4))) {
         // Set the winner and return true
-        this.winner = this.turn % 2;
+        this.winner = this.players[this.turn % 2];
         return true;
       }
     }

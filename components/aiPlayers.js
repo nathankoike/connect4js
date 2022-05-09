@@ -1,6 +1,7 @@
 const { Game } = require("./game");
+const { train, predict, unfunn } = require("./nn");
 
-class AiPlayer {
+class MctsPlayer {
   constructor(piece, timer, constant = 10) {
     // The piece we are playing
     this.piece = piece;
@@ -59,20 +60,24 @@ class AiPlayer {
       let copiedGame = state.copy();
       copiedGame.move(choice);
 
+      if (copiedGame.gameOver && copiedGame.winner === this.piece)
+        return choice;
+
+      // The result of the simulated game
+      let result = this._simGame(copiedGame);
+
       // Save a record of this move
       outcomes[moveIndex] = [
-        outcomes[moveIndex][0] + this._simGame(copiedGame),
+        outcomes[moveIndex][0] + result ? (result === this.piece ? 1 : -1) : 0,
         outcomes[moveIndex][1] + 1,
       ];
     }
 
-    console.log(outcomes);
-
     // Find the highest win:loss ratio and return that move
     let ucbs = outcomes.map((e) => e[0] / e[1]);
-    console.log(ucbs);
+
     return moves[ucbs.indexOf(Math.max(...ucbs))];
   }
 }
 
-module.exports = { AiPlayer };
+module.exports = { MctsPlayer };
