@@ -1,8 +1,18 @@
 const { Game } = require("./game");
-const { train, predict, unfunn } = require("./nn");
+const { predict } = require("./nn");
 
-class MctsPlayer {
-  constructor(piece, timer, constant = 10) {
+class RandomPlayer {
+  constructor() {}
+
+  // Return a random move
+  getMove(state) {
+    const moves = state.availableMoves();
+    return moves[Math.floor(Math.random() * moves.length)];
+  }
+}
+
+class MCTSPlayer {
+  constructor(piece, timer, constant = 50) {
     // The piece we are playing
     this.piece = piece;
 
@@ -80,4 +90,46 @@ class MctsPlayer {
   }
 }
 
-module.exports = { MctsPlayer };
+class NNPlayer {
+  constructor(piece, nn) {
+    // The piece we are playing
+    this.piece = piece;
+
+    // The neural network this player uses (boardLength * boardWidth inputs)
+    this.nn = nn;
+  }
+
+  // Run the board through the NN and select one move to make
+  getMove(state) {
+    // All available moves
+    const moves = state.availableMoves();
+
+    // Copy the state, apply all the moves to the copies, and predict the endings
+    // of each game
+    const predictions = moves
+      .map((choice) => {
+        // Copy the state and apply the move
+        let game = state.copy();
+        game.move(choice);
+
+        // Return the game with the move applied
+        return game;
+      })
+      .map((outcome) => {
+        // Remove nesting from the board to get an acceptable input for the NN
+        let input = [];
+        outcome.board.forEach((row) => row.forEach((e) => input.push(e)));
+
+        // Return the predicted outcome of the game
+        return predict(this.nn, input);
+      });
+
+    // What is the likelihood of a loss?
+    const losses = predictions.map((p) => p[this.piece > 0 ? 0 : 1]);
+
+    // Return the position with the smallest likelihood of a loss
+    return moves[losses.indexOf(Math.min(...losses))];
+  }
+}
+
+module.exports = { RandomPlayer, MCTSPlayer, NNPlayer };

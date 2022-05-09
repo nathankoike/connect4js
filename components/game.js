@@ -20,10 +20,14 @@ class Game {
   reset() {
     // Reset the board
     for (let c = 0; c < this.board.length; c++)
-      this.board[c] = Array(this.board[0].length).fill(" ");
+      this.board[c] = Array(this.board[0].length).fill(0);
 
     // Reset the turn counter
     this.turn = 0;
+
+    // Reset the outcome
+    this.gameOver = false;
+    this.winner = null;
   }
 
   // Create a deep copy of this game

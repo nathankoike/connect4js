@@ -144,4 +144,5 @@ module.exports = {
   train,
   predict,
   unfunn,
+  toJSON,
 };
