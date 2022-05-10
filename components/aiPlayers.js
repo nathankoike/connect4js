@@ -132,4 +132,94 @@ class NNPlayer {
   }
 }
 
-module.exports = { RandomPlayer, MCTSPlayer, NNPlayer };
+class MinLossNNPlayer {
+  constructor(piece, nn) {
+    // The piece we are playing
+    this.piece = piece;
+
+    // The neural network this player uses (boardLength * boardWidth inputs)
+    this.nn = nn;
+  }
+
+  // Run the board through the NN and select one move to make
+  getMove(state) {
+    // All available moves
+    const moves = state.availableMoves();
+
+    // Copy the state, apply all the moves to the copies, and predict the endings
+    // of each game
+    const predictions = moves
+      .map((choice) => {
+        // Copy the state and apply the move
+        let game = state.copy();
+        game.move(choice);
+
+        // Return the game with the move applied
+        return game;
+      })
+      .map((outcome) => {
+        // Remove nesting from the board to get an acceptable input for the NN
+        let input = [];
+        outcome.board.forEach((row) => row.forEach((e) => input.push(e)));
+
+        // Return the predicted outcome of the game
+        return predict(this.nn, input);
+      });
+
+    // What is the likelihood of a loss?
+    const losses = predictions.map((p) => p[this.piece > 0 ? 1 : 0]);
+
+    // Return the position with the smallest likelihood of a loss
+    return moves[losses.indexOf(Math.min(...losses))];
+  }
+}
+
+class MaxWinNNPlayer {
+  constructor(piece, nn) {
+    // The piece we are playing
+    this.piece = piece;
+
+    // The neural network this player uses (boardLength * boardWidth inputs)
+    this.nn = nn;
+  }
+
+  // Run the board through the NN and select one move to make
+  getMove(state) {
+    // All available moves
+    const moves = state.availableMoves();
+
+    // Copy the state, apply all the moves to the copies, and predict the endings
+    // of each game
+    const predictions = moves
+      .map((choice) => {
+        // Copy the state and apply the move
+        let game = state.copy();
+        game.move(choice);
+
+        // Return the game with the move applied
+        return game;
+      })
+      .map((outcome) => {
+        // Remove nesting from the board to get an acceptable input for the NN
+        let input = [];
+        outcome.board.forEach((row) => row.forEach((e) => input.push(e)));
+
+        // Return the predicted outcome of the game
+        return predict(this.nn, input);
+      });
+
+    // What is the likelihood of a win?
+    const wins = predictions.map((p) => p[this.piece > 0 ? 0 : 1]);
+
+    // Return the position with the smallest likelihood of a loss
+    return moves[wins.indexOf(Math.max(...wins))];
+  }
+}
+
+module.exports = {
+  RandomPlayer,
+  MCTSPlayer,
+  NNPlayer,
+  MaxWinNNPlayer,
+  MinLossNNPlayer,
+};

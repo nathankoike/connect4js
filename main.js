@@ -5,6 +5,8 @@ const {
   RandomPlayer,
   MCTSPlayer,
   NNPlayer,
+  MaxWinNNPlayer,
+  MinLossNNPlayer,
 } = require("./components/aiPlayers");
 const { train, unfunn, toJSON } = require("./components/nn");
 
@@ -36,7 +38,7 @@ function trainNN(games, period = 25, file = null) {
       ];
 
       players = [
-        new NNPlayer(1, nn),
+        new MaxWinNNPlayer(1, nn),
         opponents[Math.floor(Math.random() * opponents.length)],
       ];
     } else {
@@ -52,7 +54,7 @@ function trainNN(games, period = 25, file = null) {
 
       players = [
         opponents[Math.floor(Math.random() * opponents.length)],
-        new NNPlayer(-1, nn),
+        new MaxWinNNPlayer(-1, nn),
       ];
     }
 
@@ -81,7 +83,7 @@ function trainNN(games, period = 25, file = null) {
     // Periodically save the NN
     if (!(i % period)) {
       try {
-        fs.writeFileSync(`./_nn${i}.json`, JSON.stringify(toJSON(nn)));
+        fs.writeFileSync(`./nn${i}_.json`, JSON.stringify(toJSON(nn)));
       } catch (err) {
         console.log(err);
       }
@@ -95,17 +97,67 @@ function trainNN(games, period = 25, file = null) {
   }
 }
 
+// Find the best neural network
+function bestNN(nnCount) {
+  let game = new Game();
+
+  let ratios = Array(nnCount).fill(0);
+  let players = undefined;
+
+  for (let i = 0; i < nnCount; i++) {
+    console.log(`NN: ${i * 100}`);
+
+    // Play 15 games as each piece
+    for (let r = 0; r < 30; r++) {
+      // Let the players switch sides
+      if (r % 2)
+        players = [
+          new MCTSPlayer(1, 500, 50),
+          new MinLossNNPlayer(
+            -1,
+            JSON.parse(fs.readFileSync(`./nn_${i * 100}.json`)).nn
+          ),
+        ];
+      else
+        players = [
+          new MinLossNNPlayer(
+            1,
+            JSON.parse(fs.readFileSync(`./nn_${i * 100}.json`)).nn
+          ),
+          new MCTSPlayer(-1, 500, 50),
+        ];
+
+      // Play a game
+      while (!game.gameOver) game.move(players[game.turn % 2].getMove(game));
+
+      // Update the ratios
+      ratios[i] =
+        ratios[i] + game.winner === players[(r + 1) % 2].piece
+          ? 1
+          : game.winner
+          ? 0
+          : 0.1;
+
+      // Reset the game
+      game.reset();
+    }
+  }
+
+  return ratios.indexOf(Math.max(...ratios));
+}
+
 function main() {
   let game = new Game();
 
-  let nn = trainNN(10000, 100);
-
-  // let players = [new MCTSPlayer(1, 3000, 300), new MCTSPlayer(-1, 3000, 3)];
+  // let nn = trainNN(10000, 100);
 
   let players = [
-    new MCTSPlayer(1, 1500, 100),
-    // new NNPlayer(1, JSON.parse(fs.readFileSync("./_nn100.json")).nn),
-    new NNPlayer(-1, JSON.parse(fs.readFileSync("./_nn100.json")).nn),
+    new MCTSPlayer(1, 500, 50),
+    // new MinLossNNPlayer(1, JSON.parse(fs.readFileSync("./nn6500_.json")).nn),
+    // new NNPlayer(1, JSON.parse(fs.readFileSync("./_nn6500.json")).nn),
+    // new MCTSPlayer(-1, 500, 50),
+    new MinLossNNPlayer(-1, JSON.parse(fs.readFileSync("./nn6500_.json")).nn),
+    // new MaxWinNNPlayer(-1, JSON.parse(fs.readFileSync("./nn10000_.json")).nn),
   ];
 
   while (!game.gameOver) {
@@ -113,6 +165,8 @@ function main() {
     game.printBoard();
     console.log();
   }
+
+  // console.log(bestNN(100));
 }
 
 main();
