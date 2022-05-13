@@ -87,7 +87,7 @@ function trainNN(games, epochs, piece, name, savePeriod = 25, file = null) {
 }
 
 // Take an existing NN and train it a bit more
-async function developNN(games, epochs, piece, nn) {
+function developNN(games, epochs, piece, nn) {
   let game = new Game();
 
   // Let the NN play some number of games
@@ -145,15 +145,7 @@ async function developNN(games, epochs, piece, nn) {
 }
 
 // Generate a NN with a generated substructure
-async function geneticNN(
-  gens,
-  popSize,
-  survivors,
-  inputs,
-  maxLayers,
-  maxN,
-  epochs
-) {
+function geneticNN(gens, popSize, survivors, inputs, maxLayers, maxN, epochs) {
   // Generate a new layer
   const genLayer = () => Math.floor(Math.random() * (maxN - 1) + 1);
 
@@ -374,9 +366,6 @@ async function geneticNN(
     ),
   ];
 
-  xPop = await Promise.all(xPop);
-  oPop = await Promise.all(oPop);
-
   let [xWins, oWins] = [Array(popSize).fill(0), Array(popSize).fill(0)];
 
   for (let x = 0; x < xLayers.length; x++) {
@@ -459,16 +448,16 @@ function bestNN(nnCount) {
 /* =============================================================================
 =================================== MAIN =======================================
 ============================================================================= */
-async function main() {
+function main() {
   let game = new Game();
 
   // let nn = trainNN(500, 500, -1, "omin", (savePeriod = 100));
 
-  let [xLayers, oLayers] = await geneticNN(20, 25, 5, 42, 6, 42, 100);
+  let [xLayers, oLayers] = geneticNN(20, 25, 5, 42, 6, 42, 100);
 
   let [xPlayer, oPlayer] = [
-    await developNN(500, 500, 1, unfunn(42, [...xLayers, 3])),
-    await developNN(500, 500, -1, unfunn(42, [...oLayers, 3])),
+    developNN(500, 500, 1, unfunn(42, [...xLayers, 3])),
+    developNN(500, 500, -1, unfunn(42, [...oLayers, 3])),
   ];
 
   let players = [
