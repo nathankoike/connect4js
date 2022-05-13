@@ -460,6 +460,14 @@ function main() {
     developNN(500, 500, -1, unfunn(42, [...oLayers, 3])),
   ];
 
+  // Save the players
+  try {
+    fs.writeFileSync("genX_1.json", JSON.stringify(toJSON(xPlayer)));
+    fs.writeFileSync("genO_1.json", JSON.stringify(toJSON(oPlayer)));
+  } catch (err) {
+    console.log(err);
+  }
+
   let players = [
     // new MCTSPlayer(1, 100, 50),
     // new MinLossNNPlayer(1, JSON.parse(fs.readFileSync("./nn6500_.json")).nn),
