@@ -445,66 +445,67 @@ function bestNN(nnCount) {
   return ratios.indexOf(Math.max(...ratios));
 }
 
+// Play a game with the players
+function playGame(players) {
+  let game = new Game();
+
+  while (!game.gameOver) {
+    game.move(players[game.turn % 2].getMove(game));
+    game.printBoard();
+    console.log();
+  }
+}
+
 /* =============================================================================
 =================================== MAIN =======================================
 ============================================================================= */
 function main() {
-  let game = new Game();
-
   // let nn = trainNN(500, 500, -1, "omin", (savePeriod = 100));
 
-  let [xLayers, oLayers] = geneticNN(20, 25, 5, 42, 6, 42, 100);
-
-  let [xPlayer, oPlayer] = [
-    developNN(500, 500, 1, unfunn(42, [...xLayers, 3])),
-    developNN(500, 500, -1, unfunn(42, [...oLayers, 3])),
-  ];
-
-  // Save the players
-  try {
-    fs.writeFileSync("genX_1.json", JSON.stringify(toJSON(xPlayer)));
-    fs.writeFileSync("genO_1.json", JSON.stringify(toJSON(oPlayer)));
-  } catch (err) {
-    console.log(err);
-  }
+  // let [xLayers, oLayers] = geneticNN(20, 25, 5, 42, 6, 42, 100);
+  //
+  // let [xPlayer, oPlayer] = [
+  //   developNN(500, 500, 1, unfunn(42, [...xLayers, 3])),
+  //   developNN(500, 500, -1, unfunn(42, [...oLayers, 3])),
+  // ];
+  //
+  // // Save the players
+  // try {
+  //   fs.writeFileSync("genX_1.json", JSON.stringify(toJSON(xPlayer)));
+  //   fs.writeFileSync("genO_1.json", JSON.stringify(toJSON(oPlayer)));
+  // } catch (err) {
+  //   console.log(err);
+  // }
 
   let players = [
     // new MCTSPlayer(1, 100, 50),
     // new MinLossNNPlayer(1, JSON.parse(fs.readFileSync("./nn6500_.json")).nn),
     // new NNPlayer(1, JSON.parse(fs.readFileSync("./_nn6500.json")).nn),
-    new MaxWinNNPlayer(1, xPlayer),
+    new MaxWinNNPlayer(1, JSON.parse(fs.readFileSync("./genX_1.json")).nn),
     // =========================================================================
-    new MCTSPlayer(-1, 100, 50),
+    new MCTSPlayer(-1, 1000, 100),
     // new MinLossNNPlayer(-1, JSON.parse(fs.readFileSync("./omin500.json")).nn),
     // new MaxWinNNPlayer(-1, JSON.parse(fs.readFileSync("./omax500.json")).nn),
     // new MaxWinNNPlayer(-1, JSON.parse(fs.readFileSync("./omax500.json")).nn),
   ];
 
-  while (!game.gameOver) {
-    game.move(players[game.turn % 2].getMove(game));
-    game.printBoard();
-    console.log();
-  }
+  playGame(players);
 
-  game.reset();
-
-  players = [
-    new MCTSPlayer(1, 100, 50),
-    // new MinLossNNPlayer(1, JSON.parse(fs.readFileSync("./nn6500_.json")).nn),
-    // new MaxWinNNPlayer(1, JSON.parse(fs.readFileSync("./nn6500_.json")).nn),
-    // new NNPlayer(1, JSON.parse(fs.readFileSync("./_nn6500.json")).nn),
-    // =========================================================================
-    // new MCTSPlayer(-1, 500, 50),
-    // new MinLossNNPlayer(-1, JSON.parse(fs.readFileSync("./omin500.json")).nn),
-    // new MaxWinNNPlayer(-1, JSON.parse(fs.readFileSync("./omax500.json")).nn),
-    new MaxWinNNPlayer(-1, oPlayer),
-  ];
-
-  while (!game.gameOver) {
-    game.move(players[game.turn % 2].getMove(game));
-    game.printBoard();
-    console.log();
-  }
+  // game.reset();
+  //
+  // players = [
+  //   new MCTSPlayer(1, 100, 50),
+  //   // new MinLossNNPlayer(1, JSON.parse(fs.readFileSync("./nn6500_.json")).nn),
+  //   // new MaxWinNNPlayer(1, JSON.parse(fs.readFileSync("./nn6500_.json")).nn),
+  //   // new NNPlayer(1, JSON.parse(fs.readFileSync("./_nn6500.json")).nn),
+  //   // =========================================================================
+  //   // new MCTSPlayer(-1, 500, 50),
+  //   // new MinLossNNPlayer(-1, JSON.parse(fs.readFileSync("./omin500.json")).nn),
+  //   // new MaxWinNNPlayer(-1, JSON.parse(fs.readFileSync("./omax500.json")).nn),
+  //   new MaxWinNNPlayer(-1, oPlayer),
+  // ];
+  //
+  // playGame(players);
 
   // console.log(bestNN(100));
 }
